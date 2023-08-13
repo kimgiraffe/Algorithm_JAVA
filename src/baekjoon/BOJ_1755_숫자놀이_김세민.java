@@ -21,7 +21,7 @@ public class BOJ_1755_숫자놀이_김세민 {
 	static StringTokenizer st;
 	static StringBuilder sb;
 	
-	static int start, end; // 읽을 숫자의 시작과 끝
+	static int start, end, length; // 읽을 숫자의 시작과 끝
 	static int idx; // 숫자와 읽은 문자열의 시작 인덱스
 	static final String[] READ_NUM_STRINGS= {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
 	
@@ -45,13 +45,14 @@ public class BOJ_1755_숫자놀이_김세민 {
 	
 	public static void main(String[] args) throws IOException {
 		br = new BufferedReader(new InputStreamReader(System.in));
-		
+		sb = new StringBuilder();
 		st = new StringTokenizer(br.readLine().trim());
 		
 		start = Integer.parseInt(st.nextToken()); //시작 숫자 입력
 		end = Integer.parseInt(st.nextToken()); //끝 숫자 입력
-
-		pairs = new pair[end-start+1];
+		length = end - start + 1;
+		
+		pairs = new pair[length];
 		
 		for(int num = start; num <= end; num++) {
 			if(num < 10) { // 읽을 숫자가 한 자리 숫자인 경우...
@@ -65,11 +66,12 @@ public class BOJ_1755_숫자놀이_김세민 {
 		Arrays.sort(pairs);
 		
 		// 숫자를 한 줄에 10개씩 출력
-		for(int iter = 0; iter < end-start+1; iter++) {
+		for(int iter = 0; iter < length; iter++) {
 			if(iter % 10 == 0 && iter != 0) {
-				System.out.println();
+				sb.append('\n');
 			}
-			System.out.print(pairs[iter].number+" ");
+			sb.append(pairs[iter].number).append(' ');
 		}
+		System.out.println(sb);
 	}
 }
