@@ -23,7 +23,6 @@ public class BOJ_20304_비밀번호제작_김세민 {
 
 	static BufferedReader br;
 	static StringTokenizer st;
-	static StringBuilder sb;
 	
 	static int max_password; // 관리자 계정 비밀번호의 최댓값
 	static int attempt_cnt; // 로그인 시도에 사용된 비밀번호의 개수
@@ -51,7 +50,6 @@ public class BOJ_20304_비밀번호제작_김세민 {
 	
 	public static void main(String[] args) throws Exception {
 		br = new BufferedReader(new InputStreamReader(System.in));
-		sb = new StringBuilder();
 		
 		max_password = Integer.parseInt(br.readLine().trim()); // 관리자 계정 비밀번호의 최댓값 입력
 		attempt_cnt = Integer.parseInt(br.readLine().trim()); // 로그인 시도에 사용된 비밀번호의 개수 입력
@@ -69,8 +67,7 @@ public class BOJ_20304_비밀번호제작_김세민 {
 			queue.offer(attemps[idx]); // 큐에 안전거리가 0인 비밀번호들을 삽입
 		}
 		bfs();
-		sb.append(MAX_SAFETY);
-		System.out.println(sb);
+		System.out.println(MAX_SAFETY);
 		
 	}
 }
