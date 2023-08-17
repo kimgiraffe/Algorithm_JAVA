@@ -1,7 +1,7 @@
 package swea;
 import java.util.Scanner;
 
-class SWEA_2068 {
+class SWEA_2068_최대수구하기_김세민 {
 	public static void main(String[] args) throws Exception {
 		Scanner sc = new Scanner(System.in);
 		int T = sc.nextInt();
