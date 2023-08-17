@@ -1,7 +1,7 @@
 package swea;
 import java.util.*;
 
-class SWEA_2007 {
+class SWEA_2007_패턴마디의길이_김세민 {
 	public static void main(String[] args) throws Exception {
 		Scanner sc = new Scanner(System.in);
 		
