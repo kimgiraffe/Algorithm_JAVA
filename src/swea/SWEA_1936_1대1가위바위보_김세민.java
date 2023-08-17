@@ -1,7 +1,7 @@
 package swea;
 import java.util.Scanner;
 
-class SWEA_1936 {
+class SWEA_1936_1대1가위바위보_김세민 {
 	public static void main(String[] args) throws Exception {
 		Scanner sc = new Scanner(System.in);
 		int A = sc.nextInt();
