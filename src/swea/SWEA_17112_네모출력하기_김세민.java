@@ -1,7 +1,6 @@
 package swea;
-import java.util.*;
 
-class SWEA_17112 {
+class SWEA_17112_네모출력하기_김세민 {
 	public static void main(String[] args) throws Exception {
 		for(int i = 0; i < 10; i++) {
 			for(int j = 0; j < 10; j++) {
