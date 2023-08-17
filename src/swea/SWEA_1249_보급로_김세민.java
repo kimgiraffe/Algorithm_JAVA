@@ -18,7 +18,7 @@ class Pair implements Comparable<Pair>{
     }
 }
 
-public class SWEA_1249 {
+public class SWEA_1249_보급로_김세민 {
     static int[] dx = {0, 1, 0, -1};
     static int[] dy = {-1, 0, 1, 0};
 
