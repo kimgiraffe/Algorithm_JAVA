@@ -10,7 +10,6 @@ import java.util.StringTokenizer;
  * 1.빌딩들의 높이를 순회하면서 양 옆으로 두 빌딩의 높이가 자신의 높이보다 낮은지 확인
  * 2.조건을 만족하는 경우 자신보다 낮은 양 옆 4개의 건물 중 가장 높은 건물의 높이를 자신의 높이에서 뺸 세대만큼 조망권 확보 가능
  * @author semin.kim
- *
  */
 
 public class SWEA_1206_View_김세민 {
