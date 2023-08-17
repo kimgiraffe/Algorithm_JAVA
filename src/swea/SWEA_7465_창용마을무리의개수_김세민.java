@@ -1,7 +1,7 @@
 package swea;
 import java.util.Scanner;
 
-class SWEA_7465 {
+class SWEA_7465_창용마을무리의개수_김세민 {
 	static boolean visited[];
 	static int[][] R;
 	static int N, cnt;
