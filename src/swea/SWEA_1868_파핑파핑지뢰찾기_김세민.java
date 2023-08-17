@@ -3,7 +3,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
 
-class SWEA_1868 {
+class SWEA_1868_파핑파핑지뢰찾기_김세민 {
 	static int N;
 	static char[][] map;
 	static boolean[][] visited;
