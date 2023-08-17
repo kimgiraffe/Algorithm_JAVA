@@ -1,7 +1,7 @@
 package swea;
 import java.util.Scanner;
 
-class SWEA_1248 {
+class SWEA_1248_공통조상_김세민 {
 	public static class Node{
 		int parent, left, right;
 		
