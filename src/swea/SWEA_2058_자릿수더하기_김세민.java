@@ -1,7 +1,7 @@
 package swea;
 import java.util.Scanner;
 
-class SWEA_2058 {
+class SWEA_2058_자릿수더하기_김세민 {
 	public static void main(String[] args) throws Exception {
 		Scanner sc = new Scanner(System.in);
 		
