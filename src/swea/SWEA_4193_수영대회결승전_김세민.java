@@ -3,7 +3,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
 
-public class SWEA_4193 {
+public class SWEA_4193_수영대회결승전_김세민 {
 	static class Player{
 		int row, col, cnt;
 		public Player(int row, int col, int cnt) {
