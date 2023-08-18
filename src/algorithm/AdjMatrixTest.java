@@ -1,6 +1,8 @@
 package algorithm;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Queue;
 import java.util.Scanner;
 
 // 무향 그래프
@@ -22,8 +24,33 @@ public class AdjMatrixTest {
 			adjMatrix[to][from] = adjMatrix[from][to] = 1;
 		}
 		
-		for(int[] is : adjMatrix) {
-			System.out.println(Arrays.toString(is));
+		bfs(adjMatrix);
+		
+//		for(int[] is : adjMatrix) {
+//			System.out.println(Arrays.toString(is));
+//		}
+	}
+	
+	private static void bfs(int[][] adjMatrix) {
+		int size = adjMatrix.length;
+		Queue<Integer> queue = new ArrayDeque<Integer>();
+		boolean[] visited = new boolean[size];
+		
+		// 탐색 시작점 정점 0으로 하자.
+		queue.offer(0);
+		visited[0] = true;
+		
+		while(!queue.isEmpty()) {
+			int current = queue.poll();
+			System.out.println((char)(current+65));
+			
+			// 현재 정점의 인접정점을 체크하며 대기열에 넣기
+			for(int i = 0; i < size; i++) {
+				if(adjMatrix[current][i] != 0 && !visited[i]) {
+					queue.offer(i);
+					visited[i] = true; 
+				}
+			}
 		}
 	}
 }
