@@ -13,7 +13,7 @@ import java.io.InputStreamReader;
  * @author semin.kim
  */
 
-public class SWEA_15941_평행사변향_김세민 {
+public class SWEA_15941_평행사변형_김세민 {
 	
 	static BufferedReader br; // 입력
 	static StringBuilder sb; // 출력
