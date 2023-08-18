@@ -1,6 +1,8 @@
 package algorithm;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Queue;
 import java.util.Scanner;
 
 // 무향 그래프
@@ -39,8 +41,31 @@ public class AdjListTest {
 			adjList[to] = new Node(from, adjList[to]);
 		}
 		
-		for(Node node : adjList) { // node : 각 정점의 인접리스트의 헤드
-			System.out.println(node);
+		bfs(adjList);
+		
+//		for(Node node : adjList) { // node : 각 정점의 인접리스트의 헤드
+//			System.out.println(node);
+//		}
+	}
+	
+	private static void bfs(Node adjList[]) {
+		int size =  adjList.length;
+		Queue<Integer> queue = new ArrayDeque<Integer>();
+		boolean[] visited = new boolean[size];
+		
+		queue.offer(0);
+		visited[0] = true;
+		
+		while(!queue.isEmpty()) {
+			int current = queue.poll();
+			System.out.println((char)(current+65));
+			
+			for(Node temp = adjList[current]; temp != null; temp = temp.next) {
+				if(!visited[temp.vertex]) {
+					queue.offer(temp.vertex);
+					visited[temp.vertex] = true;
+				}
+			}
 		}
 	}
 }
