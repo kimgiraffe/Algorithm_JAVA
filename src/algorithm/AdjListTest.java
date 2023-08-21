@@ -46,6 +46,8 @@ public class AdjListTest {
 //		for(Node node : adjList) { // node : 각 정점의 인접리스트의 헤드
 //			System.out.println(node);
 //		}
+		
+		dfs(adjList, new boolean[V], 0);
 	}
 	
 	private static void bfs(Node adjList[]) {
@@ -65,6 +67,17 @@ public class AdjListTest {
 					queue.offer(temp.vertex);
 					visited[temp.vertex] = true;
 				}
+			}
+		}
+	}
+	
+	private static void dfs(Node adjList[], boolean[] visited, int current) {
+		visited[current] = true;
+		System.out.println((char)(current+65));
+		
+		for(Node temp = adjList[current]; temp != null; temp = temp.next) {
+			if(!visited[temp.vertex]) {
+				dfs(adjList, visited, temp.vertex);
 			}
 		}
 	}
