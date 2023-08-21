@@ -98,7 +98,7 @@ public class BOJ_10836_여왕벌_김세민 {
 			}
 			update_firsts(); // 제일 왼쪽 열과 제일 위 행의 애벌레 크기 갱신
 		}
-		update_rest(); // 나머지 ㅇ벌레 크기 갱신
+		update_rest(); // 나머지 벌레 크기 갱신
 
 		sb = new StringBuilder();
 		
