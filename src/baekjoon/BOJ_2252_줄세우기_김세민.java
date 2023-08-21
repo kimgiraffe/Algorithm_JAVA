@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 
 /**
@@ -15,8 +15,13 @@ import java.util.Vector;
  * 
  * N(1이상 32000이하)명의 학생들을 키 순서대로 줄 세우기
  * 일부 학생들의 키를 두 명씩 비교
+ * 번호가 정해지지 않은 학생들을 어떻게 처리...?
  * 
  * 
+ * 1. 비교를 한 번도 안한(진입차수가 0인) 학생들을 큐에 삽입
+ * 2. 큐에서 원소를 꺼내 연결된 모든 간선을 제거
+ * 3. 간선 제거 후 진입차수가 0이 된 정점을 큐에 삽입
+ * 4. 큐가 빌 때까지 2~3을 반복 
  * @author semin.kim
  *
  */
@@ -30,7 +35,7 @@ public class BOJ_2252_줄세우기_김세민 {
 	static int student_cnt; // 학생들의 수
 	static int compare_cnt; // 비교횟수
 	
-	static ArrayList<Integer>[] student_list;
+	static List<Integer>[] student_list;
 	static int[] indegree;
 	static Queue<Integer> queue = new ArrayDeque<>();
 
@@ -40,9 +45,9 @@ public class BOJ_2252_줄세우기_김세민 {
 			int temp = queue.poll();
 			System.out.println(temp);
 			
-			for(int idx = 0; idx < student_list[idx].size(); idx++) {
-				if(--indegree[student_list[temp].get(idx)] == 0) {
-					queue.add(student_list[temp].get(idx));
+			for(int idx = 0; idx < student_list[temp].size(); idx++) {
+				if(--indegree[student_list[temp].get(idx)] == 0) { // 간선 제거 후 진입차수가 0이 된 정점
+					queue.add(student_list[temp].get(idx)); // 큐에 삽입
 				}
 			}
 		}
@@ -57,7 +62,7 @@ public class BOJ_2252_줄세우기_김세민 {
 		compare_cnt = Integer.parseInt(st.nextToken());
 		
 		indegree = new int[student_cnt + 1];
-		student_list = new ArrayList[student_cnt+1];
+		student_list = new List[student_cnt + 1];
 		for(int idx = 1; idx <= student_cnt; idx++) {
 			student_list[idx] = new ArrayList<>();
 		}
@@ -73,13 +78,12 @@ public class BOJ_2252_줄세우기_김세민 {
 			
 		}
 		
-		for(int idx = 1; idx <= student_cnt; idx++) { // 순서 비교를 안한 학생들을 번호 순서대로 큐에 삽입
+		for(int idx = 1; idx <= student_cnt; idx++) { // 진입 차수가 0인 학생들을 큐에 삽입
 			if(indegree[idx] == 0) {
 				queue.add(idx);
 			}
 		}
 		
 		bfs();
-		
 	}
 }
