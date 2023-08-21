@@ -29,6 +29,8 @@ public class AdjMatrixTest {
 //		for(int[] is : adjMatrix) {
 //			System.out.println(Arrays.toString(is));
 //		}
+		
+		dfs(adjMatrix, new boolean[V], 0);
 	}
 	
 	private static void bfs(int[][] adjMatrix) {
@@ -52,5 +54,17 @@ public class AdjMatrixTest {
 				}
 			}
 		}
+	}
+	
+	private static void dfs(int[][] adjMatrix, boolean[] visited, int current) {
+		visited[current] = true;
+		System.out.println((char)(current+65));
+		
+		for(int i = 0, size = adjMatrix.length; i < size; i++) {
+			if(adjMatrix[current][i] != 0 && !visited[i]) {
+				dfs(adjMatrix, visited, i);
+			}
+		}
+		
 	}
 }
