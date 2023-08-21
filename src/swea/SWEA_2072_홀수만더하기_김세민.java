@@ -1,22 +1,37 @@
 package swea;
+
 import java.util.Scanner;
 
-class SWEA_2072_홀수만더하기_김세민 {
-	public static void main(String[] args) throws Exception {
+/**
+ * 2072_홀수만 더하기
+ * @author semin.kim
+ * 1. 10개의 수를 입력 받아 배열에 담는다.
+ * 2. 각 테스트 케이스마다 합을 0으로 초기화하고
+ * 3. 배열을 순회하며 홀수이면 더한다.
+ * 4. 총 합을 출력한다.
+ */
+
+public class SWEA_2072_홀수만더하기_김세민 {
+	public static int T, N, sum;
+	public static int[] num;
+	
+	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
-		int T = sc.nextInt();
 		
+		T = sc.nextInt();
 		for(int test_case = 1; test_case <= T; test_case++) {
-			int[] arr = new int[10];
-			int sum = 0;
-			for(int i = 0; i < 10; i++) {
-				arr[i] = sc.nextInt();
-				if(arr[i] % 2 == 1) {
-					sum += arr[i];
+			num = new int[10];
+			sum = 0;	// 합을 0으로 초기화
+			for(int idx = 0 ; idx < 10; idx++) {
+				num[idx] = sc.nextInt(); //10개의 수를 배열에 저장
+				if(num[idx] % 2 == 1) {	// 홀수이면 더함
+					sum += num[idx];
 				}
 			}
 			System.out.println("#" + test_case + " " + sum);
 		}
+		
 		sc.close();
 	}
+
 }
