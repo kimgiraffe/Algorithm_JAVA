@@ -3,152 +3,207 @@ package baekjoon;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.StringTokenizer;
 
 /**
- * BOJ_2931_가스관
- * R행 C열, 각 칸은 비어있거나 7가지 기본 블록('|', '-', '+', '1', '2', '3', '4')
- * '+' 블록은 두 방향(수직, 수평)으로 흘러야 한다.
- * 지운 블록 한 칸의 행과 열의 위치, 어떤 블록이었는지 출력
- * 
+ * 가스의 흐름은 유일하다.
+ * '+' 블록의 경우... 수직, 수평으로 한 번씩 지나야한다.
  * @author semin.kim
  *
  */
+
 
 public class BOJ_2931_가스관_김세민 {
 
 	static BufferedReader br;
 	static StringTokenizer st;
-	
-	static int row_size, col_size;
+	static StringBuilder sb;
+
+	static int rowSize, colSize; // 세로, 가로 크기
 	static char[][] map;
 	static int[][] visited;
-	
-	static final int[] DR = {-1, 1, 0, 0}; // 좌우
-	static final int[] DC = {0, 0, -1, 1}; // 상하
-	static final boolean[][] pipes = {{true, true, false, false}, {false, false, true, true}, {true, true, true, true},
-			{false, true, false, true}, {true, false, false, true}, {true, false, true, false}, {false, true, true, false}
-	};
-	
-	static Map<Character, Integer> pipe_idx;
-	
-	static class pos {
+	static int startRowIdx, startColIdx; // 시작점(모스크바)의 세로, 가로 위치
+	static int endRowIdx, endColIdx; // 끝점(자그레브)의 세로, 가로 위치
+
+	static final int[] D_ROW = {-1, 1, 0, 0}; // 상하
+	static final int[] D_COL = {0, 0, -1, 1}; // 좌우
+
+	static class Pos {
 		int row;
 		int col;
 
-		public pos(int row, int col) {
+		public Pos(int row, int col) {
 			this.row = row;
 			this.col = col;
 		}
-	}
-	
-	public static void init() {
-		pipe_idx = new HashMap<>();
-		pipe_idx.put('|', 0);
-		pipe_idx.put('-', 1);
-		pipe_idx.put('+', 2);
-		pipe_idx.put('1', 3);
-		pipe_idx.put('2', 4);
-		pipe_idx.put('3', 5);
-		pipe_idx.put('4', 6);
-	}
-	
-	public static char toPipe(int num) {
-		switch(num) {
-		case 0:
-			return '|';
-		case 1:
-			return '-';
-		case 2:
-			return '+';
-		case 3:
-			return '1';
-		case 4:
-			return '2';
-		case 5:
-			return '3';
-		case 6:
-			return '4';
+
+		@Override
+		public String toString() {
+			return "Pos [row=" + row + ", col=" + col + "]";
 		}
-		return 0;
 	}
-	
-	// 반대 방향 찾는 메서드
-	public static int getOpposite(int dir) {
-		switch (dir) {
-		case 0:
-			return 1;
-		case 1:
-			return 0;
-		case 2:
-			return 2;
-		case 3:
-			return 3;
+
+	static class Block implements Comparable<Block>{
+		int row;
+		int col;
+		char type;
+
+		public Block(int row, int col, char type) {
+			this.row = row;
+			this.col = col;
+			this.type = type;
 		}
-		return dir;
-	}
-	
-	public static void printResult(int r, int c, boolean[] re) {
-		for(int idx = 0; idx < pipes.length; idx++) {
-			if(idx == 2) continue;
-			boolean flag = true;
-			for(int dir = 0; dir < 4; dir++) {
-				if(pipes[idx][dir] != re[dir]) {
-					flag = false;
-					break;
+
+		@Override
+		public String toString() {
+			return "Block [row=" + row + ", col=" + col + ", type=" + type + "]";
+		}
+
+		@Override
+		public int compareTo(Block o) {
+			if(this.row >= o.row) {
+				if(this.row == o.row) {
+					return this.col - o.col;
+				}
+				else {
+					return 1;
 				}
 			}
-			if(flag) {
-				System.out.println(r + " " + c + " " + toPipe(idx));
+			else {
+				return -1;
 			}
 		}
 	}
-	
+
+	static ArrayList<Block> blockList;
+	static ArrayList<Block> problemBlockList;
+
+	public static void findProblemBlocks() {
+		for(int idx = 0; idx < blockList.size(); idx++) {
+			int row = blockList.get(idx).row;
+			int col = blockList.get(idx).col;
+			char type = blockList.get(idx).type;
+			//			System.out.println(row + " "+col + " "+type);
+			if(type == '+') {
+				int count = 0;
+				for(int dir = 0; dir < 4; dir++) {
+					int nextRow = row + D_ROW[dir];
+					int nextCol = col + D_COL[dir];
+
+					if(nextRow < 1 || nextRow > rowSize || nextCol < 1 || nextCol > colSize) continue;
+					if(map[nextRow][nextCol] != '.') {
+						count++;
+					}
+				}
+				//				System.out.println(count);
+				if(count != 4) {
+					problemBlockList.add(new Block(row, col, type));
+				}
+			}
+			else {
+				int count = 0;
+				for(int dir = 0; dir < 4; dir++) {
+					int nextRow = row + D_ROW[dir];
+					int nextCol = col + D_COL[dir];
+
+					if(nextRow < 1 || nextRow > rowSize || nextCol < 1 || nextCol > colSize) continue;
+					if(map[nextRow][nextCol] != '.') {
+						count++;
+					}
+				}
+				//				System.out.println(count);
+				if(count < 2) {
+					problemBlockList.add(new Block(row, col, type));
+					//					System.out.println(row +" "+col+ " "+type);
+				}
+			}
+		}
+		Collections.sort(problemBlockList);
+	}
+
+	public static void findEmpty() {
+		int size = problemBlockList.size();
+		
+		if(size == 2) {
+			int row0 = problemBlockList.get(0).row;
+			int col0 = problemBlockList.get(0).col;
+			char type0 = problemBlockList.get(0).type;
+			
+			int row1 = problemBlockList.get(1).row;
+			int col1 = problemBlockList.get(1).col;
+			char type1 = problemBlockList.get(1).type;
+			
+			if(row0 + 2 == row1) {
+				sb.append(row0+1).append(" ").append(col0).append(" ").append('|');
+			}
+			else if(col0 + 2 == col1) {
+				sb.append(row0).append(" ").append(col0+1).append(" ").append('-');
+			}
+			else if(row0 + 1 == row1 && col0 + 1 == col1) {
+				if(map[row0+1][col0] != '.') {
+					sb.append(row0).append(" ").append(col0+1).append(" ").append('4');
+				}
+				else if(map[row0][col0+1] != '.'){
+					sb.append(row0+1).append(" ").append(col0).append(" ").append('2');
+				}
+			}
+			else if(row0 + 1 == row1 && col0 - 1 == col1) {
+				if(map[row0+1][col0] != '.') {
+					sb.append(row0+1).append(" ").append(col0-1).append(" ").append('1');
+				}
+				else if(map[row0][col0-1] != '.'){
+					sb.append(row0).append(" ").append(col0).append(" ").append('3');
+				}
+			}
+
+		} else if(size == 3) {
+			
+		} else if(size == 4) {
+			sb.append(problemBlockList.get(0).row+1).append(" ").append(problemBlockList.get(0).col+1).append(" ");
+		}
+
+		
+		System.out.println(sb);
+
+	}
+
+
 	public static void main(String[] args) throws IOException {
 		br = new BufferedReader(new InputStreamReader(System.in));
 		st = new StringTokenizer(br.readLine().trim());
-		
-		row_size = Integer.parseInt(st.nextToken());
-		col_size = Integer.parseInt(st.nextToken());
-		map = new char[row_size][col_size];
-		visited = new int[row_size][col_size];
-		init();
-		
-		for(int row = 0; row < row_size; row++) {
+		sb = new StringBuilder();
+
+		rowSize = Integer.parseInt(st.nextToken());
+		colSize = Integer.parseInt(st.nextToken());
+
+		map = new char[rowSize + 1][colSize + 1];
+		visited = new int[rowSize + 1][colSize + 1];
+		blockList = new ArrayList<>();
+		problemBlockList = new ArrayList<>();
+
+		for(int row = 1; row <= rowSize; row++) {
 			String tmp = br.readLine().trim();
-			for(int col = 0; col < col_size; col++) {
-				map[row][col] = tmp.charAt(col);
-				
-			}
-		}
-		
-		for(int row = 0; row < row_size; row++) {
-			for(int col = 0; col < col_size; col++) {
-				if(map[row][col] == '.') { // 빈 칸인 경우...
-					boolean[] re = new boolean[4];
-					int cnt = 0;
-					for(int dir = 0; dir < 4; dir++) {
-						int next_r = row + DR[dir];
-						int next_c = col + DC[dir];
-						
-						if(next_r >= 0 && next_c >= 0 && next_r < row_size && next_c < col_size && map[next_r][next_c] != '.'
-								&& map[next_r][next_c] != 'M' && map[next_r][next_c] != 'Z' && pipes[pipe_idx.get(map[next_r][next_c])][getOpposite(dir)]) {
-							cnt++;
-							re[dir] = true;
-						}
-					}
-					if(cnt == 4) {
-						System.out.println((row + 1) + " " + (col+1) + " +");
-						return;
-					} else if(cnt == 2) {
-						printResult(row + 1, col + 1, re);
-						return;
-					}
+			for(int col = 1; col <= colSize; col++) {
+				map[row][col] = tmp.charAt(col-1);
+				if(map[row][col] == 'M') {
+					startRowIdx = row;
+					startColIdx = col;
+				}
+				else if(map[row][col] == 'Z') {
+					endRowIdx = row;
+					endColIdx = col;
+				}
+				else if(map[row][col] != '.') {
+					blockList.add(new Block(row, col, map[row][col]));
 				}
 			}
 		}
-		
+		findProblemBlocks();
+		System.out.println(problemBlockList.toString());
+		findEmpty();
+		//		System.out.println(blockList.toString());
 	}
 }
