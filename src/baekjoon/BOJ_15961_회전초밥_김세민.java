@@ -33,50 +33,38 @@ public class BOJ_15961_회전초밥_김세민 {
 
 	static int plateCount, sushiKindCount, consecutivePlates, couponIndex; // 접시의 수, 초밥의 가짓수, 연속해서 먹는 접시의 수, 쿠폰 번호
 
-	static int[] sushi;
-	static ArrayList<Integer> plateList; // 벨트의 상태를 저장
-	static int MAX; // 먹을 수 있는 초밥 가짓수의 최댓값
+	static int[] visited; // 연속해서 먹은 접시
+	static int[] plateList; // 벨트의 상태를 저장
 
-	private static void init() {
-		int count = 0;
+	private static int calculateMax() {
+		int total = 0, MAX = 0;
+		// 연속해서 먹기
 		for(int idx = 0; idx < consecutivePlates; idx++) {
-			if(sushi[plateList.get(idx)] == 0) {
-				sushi[plateList.get(idx)] = 1;
-			}
+			if(visited[plateList[idx]] == 0) total++; // 방문한 적이 없는 경우... 가짓수 1 증가
+			visited[plateList[idx]]++; // 방문 처리
 		}
-		
-		for(int idx = 1; idx <= sushiKindCount; idx++) {
-			if(sushi[idx] == 1) {
-				count++;
-			}
-		}
-		MAX = count;
-	}
-	
-	private static void calculateMax() {
 
-		int start = 1;
+		MAX = total; // 처음 k개를 연속해서 먹은 경우의 값
 
-		while(start + consecutivePlates < plateCount) {
-			int count = 0;
-			for(int idx = start; idx <= start + consecutivePlates; idx++) {
-				if(sushi[plateList.get(idx)] == 0) { // 새로운 초밥인 경우...
-					sushi[plateList.get(idx)] = 1;
+		// 맨 앞의 초밥은 제외하고 맨 뒤에 초밥 1개를 추가
+		for(int idx = 0; idx < plateCount; idx++) {
+			if(MAX <= total) { // 최댓값 갱신
+				if(visited[couponIndex] == 0) {
+					MAX = total + 1;
+				}
+				else {
+					MAX = total;
 				}
 			}
+			// 맨 앞의 초밥 제외
+			if(visited[plateList[idx]] == 1) total--; // start를 방문한 적이 없는 경우... 가짓수 1 감소
+			visited[plateList[idx]]--; // start 미방문처리
 
-			for(int idx = 1; idx <= sushiKindCount; idx++) {
-				if(sushi[idx] == 1) {
-					count++;
-				}
-			}
-			
-			if(count > MAX) {
-				MAX = count;
-			}
-			Arrays.fill(sushi, 0);
-			start++;
+			// 맨 뒤에 초밥 1개 추가
+			if(visited[plateList[(idx + consecutivePlates) % plateCount]] == 0) total++; // 방문한 적이 없는 경우...가짓수 1 증가
+			visited[plateList[(idx + consecutivePlates) % plateCount]]++; // end 방문처리
 		}
+		return MAX;
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -88,16 +76,13 @@ public class BOJ_15961_회전초밥_김세민 {
 		consecutivePlates = Integer.parseInt(st.nextToken());
 		couponIndex = Integer.parseInt(st.nextToken());
 
-		sushi = new int[sushiKindCount + 1];
-
-		plateList = new ArrayList<>();
+		visited = new int[sushiKindCount + 1];
+		plateList = new int[plateCount];
 
 		for(int idx = 0; idx < plateCount; idx++) {
-			plateList.add(Integer.parseInt(br.readLine().trim()));
+			plateList[idx] = Integer.parseInt(br.readLine().trim());
 		}
-		init();
-		calculateMax();
-		System.out.println(MAX);
+		System.out.println(calculateMax());
 	}
 
 }
