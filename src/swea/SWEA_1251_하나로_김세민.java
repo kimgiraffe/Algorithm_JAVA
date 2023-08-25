@@ -3,16 +3,14 @@ package swea;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.StringTokenizer;
 
 /**
  * SWEA_1251_하나로
  * 모든 섬을 연결하는 가중치의 합이 최소인 그래프
- * 
- * 
+ * 가중치는 환경 부담 세율 * 터널 길이의 제곱의 곱
+ * Prim 알고리즘 이용
  * @author semin.kim
  *
  */
@@ -73,7 +71,6 @@ public class SWEA_1251_하나로_김세민 {
 		}
 	}
 
-	//	static ArrayList<Tunnel> tunnelList;
 	static long adjMatrix[][];
 
 	private static void MakeTunnel() {
@@ -81,22 +78,21 @@ public class SWEA_1251_하나로_김세민 {
 		for(int from = 0; from < islandCount; from++) {
 			for(int to = 0; to < islandCount; to++) {
 				if(from == to) adjMatrix[from][to] = 0;
+				// 해저터널 길이의 제곱
 				long distance = (islands[from].x - islands[to].x) * (islands[from].x - islands[to].x)
 						+ (islands[from].y - islands[to].y) * (islands[from].y - islands[to].y);
 				adjMatrix[from][to] = distance;
-//				System.out.print(adjMatrix[from][to] + " ");
 			}
-//			System.out.println();
 		}
 	}
 
 	public static void main(String[] args) throws IOException{
 		br = new BufferedReader(new InputStreamReader(System.in));
 
-		T = Integer.parseInt(br.readLine().trim());
+		T = Integer.parseInt(br.readLine().trim()); //테스트 케이스의 개수 입력
 		for(int testCase = 1; testCase <= T; testCase++) {
 			sb = new StringBuilder();
-			islandCount = Integer.parseInt(br.readLine().trim());
+			islandCount = Integer.parseInt(br.readLine().trim()); // 섬의 개수 입력
 			islands = new Island[islandCount];
 			adjMatrix = new long[islandCount][islandCount];
 			visited = new boolean[islandCount];
@@ -105,15 +101,15 @@ public class SWEA_1251_하나로_김세민 {
 			st = new StringTokenizer(br.readLine().trim());
 			for(int islandIdx = 0; islandIdx < islandCount; islandIdx++) {
 				islands[islandIdx] = new Island();
-				islands[islandIdx].x = Long.parseLong(st.nextToken());
+				islands[islandIdx].x = Long.parseLong(st.nextToken()); // 섬들의 x좌표 입력
 			}
 			st = new StringTokenizer(br.readLine().trim());
 			for(int islandIdx = 0; islandIdx < islandCount; islandIdx++) {
-				islands[islandIdx].y = Long.parseLong(st.nextToken());
+				islands[islandIdx].y = Long.parseLong(st.nextToken()); // 섬들의 y좌표 입력
 			}
 
-			tax = Double.parseDouble(br.readLine().trim());
-			MakeTunnel();
+			tax = Double.parseDouble(br.readLine().trim()); // 환경 부담 세율 입력
+			MakeTunnel(); // 모든 섬에 대해 터널 생성
 
 			Arrays.fill(minEdge, Long.MAX_VALUE);
 			minEdge[0] = 0;
@@ -144,7 +140,7 @@ public class SWEA_1251_하나로_김세민 {
 					}
 				}
 			}
-			
+			// 환경 부담 세율을 곱하고 소수 첫째 자리에서 반올림 후 출력
 			sb.append('#').append(testCase).append(" ").append((Math.round(result*tax/1.0)));
 			System.out.println(sb);
 		}
