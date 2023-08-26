@@ -14,6 +14,7 @@ public class SquareNumberTest {
 		System.out.println("exp1 호출 횟수 : "+callCnt1);
 		System.out.println(exp2(X, N));
 		System.out.println("exp2 호출 횟수 : "+callCnt2);
+		sc.close();
 	}
 	
 	
