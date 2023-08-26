@@ -11,5 +11,6 @@ class BOJ_6840_WhoIsInTheMiddle_김세민 {
 		
 		Arrays.sort(arr);
 		System.out.println(arr[1]);
+		sc.close();
 	}
 }
