@@ -21,6 +21,7 @@ public class MakeSpaceTest {
 		makeSpace(0, 0, N);
 		System.out.println(white);
 		System.out.println(green);
+		sc.close();
 	}
 
 	private static void makeSpace(int sr, int sc, int size) { //영역의 좌상단 r, c, 영역 크기 size
