@@ -1,209 +1,165 @@
 package baekjoon;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
 /**
- * 가스의 흐름은 유일하다.
- * '+' 블록의 경우... 수직, 수평으로 한 번씩 지나야한다.
+ * BOJ_2931_가스관
+ * 이 게임에서 유럽은 R행 C열로 나누어져 있다. 
+ * 각 칸은 비어있거나, 아래 그림과 같은 일곱가지 기본 블록으로 이루어져 있다.
+ * 가스는 모스크바에서 자그레브로 흐른다. 가스는 블록을 통해 양방향으로 흐를 수 있다. 
+ * '+'는 특별한 블록으로, 아래 예시처럼 두 방향 (수직, 수평)으로 흘러야 한다.
+ * 해커가 침임해 블록 하나를 지웠다. 지운 블록은 빈 칸이 되어있다.
+ * 해커가 어떤 칸을 지웠고, 그 칸에는 원래 어떤 블록이 있었는지 구하는 프로그램을 작성
+ * 항상 답이 존재하고, 가스의 흐름이 유일한 경우만 입력으로 주어진다, 
+ * 또, 모스크바와 자그레브가 하나의 블록과 인접해 있는 입력만 주어진다.
+ * 또, 불필요한 블록이 존재하지 않는다. 즉, 없어진 블록을 추가하면, 모든 블록에 가스가 흐르게 된다.
+ * 
+ * 파이프를 입력받으면, 연결 가능한 곳을 확인한다.
+ * 모스크바부터 깊이 우선 탐색을 통해 파이프가 이어져 있는데 빈 칸을 만나는 경우 지워진 블록
+ * 지워진 블록을 4방향 탐색으로 파이프의 모양을 결정한다.
+ * 가스의 흐름은 유일하다는 사실에 유의
  * @author semin.kim
- *
  */
-
 
 public class BOJ_2931_가스관_김세민 {
 
 	static BufferedReader br;
 	static StringTokenizer st;
-	static StringBuilder sb;
-
-	static int rowSize, colSize; // 세로, 가로 크기
+	
+	static int DELTA_ROW[] = {-1, 0, 1, 0};
+	static int DELTA_COL[] = {0, 1, 0, -1};
+	static char gas[] = {'|', '-', '+', '1', '2', '3', '4'};
 	static char[][] map;
-	static int[][] visited;
-	static int startRowIdx, startColIdx; // 시작점(모스크바)의 세로, 가로 위치
-	static int endRowIdx, endColIdx; // 끝점(자그레브)의 세로, 가로 위치
+	static boolean[][][] pipe;
+	static int startRow, startCol, rowSize, colSize,N;
+	static int[] dir = new int[4];
 
-	static final int[] D_ROW = {-1, 1, 0, 0}; // 상하
-	static final int[] D_COL = {0, 0, -1, 1}; // 좌우
-
-	static class Pos {
-		int row;
-		int col;
-
-		public Pos(int row, int col) {
-			this.row = row;
-			this.col = col;
-		}
-
-		@Override
-		public String toString() {
-			return "Pos [row=" + row + ", col=" + col + "]";
-		}
-	}
-
-	static class Block implements Comparable<Block>{
-		int row;
-		int col;
-		char type;
-
-		public Block(int row, int col, char type) {
-			this.row = row;
-			this.col = col;
-			this.type = type;
-		}
-
-		@Override
-		public String toString() {
-			return "Block [row=" + row + ", col=" + col + ", type=" + type + "]";
-		}
-
-		@Override
-		public int compareTo(Block o) {
-			if(this.row >= o.row) {
-				if(this.row == o.row) {
-					return this.col - o.col;
-				}
-				else {
-					return 1;
-				}
-			}
-			else {
-				return -1;
-			}
-		}
-	}
-
-	static ArrayList<Block> blockList;
-	static ArrayList<Block> problemBlockList;
-
-	public static void findProblemBlocks() {
-		for(int idx = 0; idx < blockList.size(); idx++) {
-			int row = blockList.get(idx).row;
-			int col = blockList.get(idx).col;
-			char type = blockList.get(idx).type;
-			//			System.out.println(row + " "+col + " "+type);
-			if(type == '+') {
-				int count = 0;
-				for(int dir = 0; dir < 4; dir++) {
-					int nextRow = row + D_ROW[dir];
-					int nextCol = col + D_COL[dir];
-
-					if(nextRow < 1 || nextRow > rowSize || nextCol < 1 || nextCol > colSize) continue;
-					if(map[nextRow][nextCol] != '.') {
-						count++;
-					}
-				}
-				//				System.out.println(count);
-				if(count != 4) {
-					problemBlockList.add(new Block(row, col, type));
-				}
-			}
-			else {
-				int count = 0;
-				for(int dir = 0; dir < 4; dir++) {
-					int nextRow = row + D_ROW[dir];
-					int nextCol = col + D_COL[dir];
-
-					if(nextRow < 1 || nextRow > rowSize || nextCol < 1 || nextCol > colSize) continue;
-					if(map[nextRow][nextCol] != '.') {
-						count++;
-					}
-				}
-				//				System.out.println(count);
-				if(count < 2) {
-					problemBlockList.add(new Block(row, col, type));
-					//					System.out.println(row +" "+col+ " "+type);
-				}
-			}
-		}
-		Collections.sort(problemBlockList);
-	}
-
-	public static void findEmpty() {
-		int size = problemBlockList.size();
-		
-		if(size == 2) {
-			int row0 = problemBlockList.get(0).row;
-			int col0 = problemBlockList.get(0).col;
-			char type0 = problemBlockList.get(0).type;
-			
-			int row1 = problemBlockList.get(1).row;
-			int col1 = problemBlockList.get(1).col;
-			char type1 = problemBlockList.get(1).type;
-			
-			if(row0 + 2 == row1) {
-				sb.append(row0+1).append(" ").append(col0).append(" ").append('|');
-			}
-			else if(col0 + 2 == col1) {
-				sb.append(row0).append(" ").append(col0+1).append(" ").append('-');
-			}
-			else if(row0 + 1 == row1 && col0 + 1 == col1) {
-				if(map[row0+1][col0] != '.') {
-					sb.append(row0).append(" ").append(col0+1).append(" ").append('4');
-				}
-				else if(map[row0][col0+1] != '.'){
-					sb.append(row0+1).append(" ").append(col0).append(" ").append('2');
-				}
-			}
-			else if(row0 + 1 == row1 && col0 - 1 == col1) {
-				if(map[row0+1][col0] != '.') {
-					sb.append(row0+1).append(" ").append(col0-1).append(" ").append('1');
-				}
-				else if(map[row0][col0-1] != '.'){
-					sb.append(row0).append(" ").append(col0).append(" ").append('3');
-				}
-			}
-
-		} else if(size == 3) {
-			
-		} else if(size == 4) {
-			sb.append(problemBlockList.get(0).row+1).append(" ").append(problemBlockList.get(0).col+1).append(" ");
-		}
-
-		
-		System.out.println(sb);
-
-	}
-
-
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		br = new BufferedReader(new InputStreamReader(System.in));
-		st = new StringTokenizer(br.readLine().trim());
-		sb = new StringBuilder();
-
+		st = new StringTokenizer(br.readLine());
 		rowSize = Integer.parseInt(st.nextToken());
 		colSize = Integer.parseInt(st.nextToken());
 
-		map = new char[rowSize + 1][colSize + 1];
-		visited = new int[rowSize + 1][colSize + 1];
-		blockList = new ArrayList<>();
-		problemBlockList = new ArrayList<>();
+		map   = new char[rowSize][colSize];
+		pipe  = new boolean[4][rowSize][colSize];
 
-		for(int row = 1; row <= rowSize; row++) {
-			String tmp = br.readLine().trim();
-			for(int col = 1; col <= colSize; col++) {
-				map[row][col] = tmp.charAt(col-1);
+		for (int row = 0; row < rowSize; row++) {
+			char temp[] = br.readLine().toCharArray();
+			for (int col = 0; col < colSize; col++) {
+				map[row][col] = temp[col];
+				if(map[row][col] != '.') {
+					//파이프 방향대로 true로 바꿔줌
+					checkPipe(row, col,true);
+				}
 				if(map[row][col] == 'M') {
-					startRowIdx = row;
-					startColIdx = col;
-				}
-				else if(map[row][col] == 'Z') {
-					endRowIdx = row;
-					endColIdx = col;
-				}
-				else if(map[row][col] != '.') {
-					blockList.add(new Block(row, col, map[row][col]));
+					startRow = row;
+					startCol = col;
 				}
 			}
 		}
-		findProblemBlocks();
-		System.out.println(problemBlockList.toString());
-		findEmpty();
-		//		System.out.println(blockList.toString());
+		dfs(startRow,startCol);
+
+	}
+	private static void checkPipe(int i, int j, boolean flag) {
+		switch (map[i][j]) {
+		case '|': 
+			pipe[0][i][j] = flag;
+			pipe[2][i][j] = flag;
+			break;
+		case '-': 
+			pipe[1][i][j] = flag;
+			pipe[3][i][j] = flag;
+			break;
+		case '1': 
+			pipe[1][i][j] = flag;
+			pipe[2][i][j] = flag;
+			break;
+		case '2': 
+			pipe[0][i][j] = flag;
+			pipe[1][i][j] = flag;
+			break;
+		case '3': 
+			pipe[0][i][j] = flag;
+			pipe[3][i][j] = flag;
+			break;
+		case '4': 
+			pipe[2][i][j] = flag;
+			pipe[3][i][j] = flag;
+			break;
+		case 'M':
+			pipe[0][i][j] = flag;
+			pipe[1][i][j] = flag;
+			pipe[2][i][j] = flag;
+			pipe[3][i][j] = flag;
+			break;
+		case 'Z': 
+			pipe[0][i][j] = flag;
+			pipe[1][i][j] = flag;
+			pipe[2][i][j] = flag;
+			pipe[3][i][j] = flag;
+			break;
+		case '+': 
+			pipe[0][i][j] = flag;
+			pipe[1][i][j] = flag;
+			pipe[2][i][j] = flag;
+			pipe[3][i][j] = flag;
+			break;
+		}
+
+	}
+	private static void dfs(int row, int col) {
+		for (int idx = 0; idx < 4; idx++) {
+			int nextRow = row + DELTA_ROW[idx];
+			int nextCol = col + DELTA_COL[idx];
+
+			//범위를 넘는 경우...
+			if(nextRow < 0 || nextRow >= rowSize || nextCol < 0 || nextCol >= colSize) continue;
+
+			//앞이 비어있는데 연결하는 파이프가 있는경우(해커가 훔쳐간 곳)...
+			if(map[nextRow][nextCol] == '.' && pipe[idx][row][col]
+					&& map[row][col] != 'M' && map[row][col] != 'Z') {
+
+				//4방향 탐색 하면서 이어질 수 있는 파이프를 찾기
+				for (int p = 0; p < 4; p++) {
+					int pnx = nextRow + DELTA_ROW[p];
+					int pny = nextCol + DELTA_COL[p];
+					//범위를 넘는 경우...
+					if(pnx < 0 || pnx >= rowSize || pny < 0 || pny >= colSize) continue;
+					//모스크바와 지그레브가 아닌 경우...
+					if(map[pnx][pny] == 'M' || map[pnx][pny] == 'Z') continue;
+					//해당 방향의 파이프 ++
+					if(pipe[(p+2)%4][pnx][pny]) dir[p]++;
+				}
+
+				findPipe(nextRow,nextCol);
+			}
+			//빈 칸인 경우...
+			else if(map[nextRow][nextCol] == '.') continue;
+
+			//파이프가 이어질 수 있는 경우...
+			if(pipe[idx][row][col] && pipe[(idx+2)%4][nextRow][nextCol]) {
+				//파이프 사용 불가능
+				pipe[idx][row][col] = false;
+				pipe[(idx+2)%4][nextRow][nextCol] = false;
+				dfs(nextRow,nextCol);
+				//파이프 사용 가능
+				pipe[idx][row][col] = true;
+				pipe[(idx+2)%4][nextRow][nextCol] = true;
+			}
+		}
+	}
+	private static void findPipe(int row , int col) {
+		char ch = 'n';
+		if(dir[0] == 1 && dir[1] == 1 && dir[2] == 1 && dir[3] == 1) ch = '+';
+		else if(dir[0] == 1 && dir[2] == 1) ch = '|';
+		else if(dir[1] == 1 && dir[3] == 1) ch = '-';
+		else if(dir[1] == 1 && dir[2] == 1) ch = '1';
+		else if(dir[0] == 1 && dir[1] == 1) ch = '2';
+		else if(dir[0] == 1 && dir[3] == 1) ch = '3';
+		else if(dir[2] == 1 && dir[3] == 1) ch = '4';
+
+		System.out.println((row+1)+" "+(col+1)+" "+ch);
+		System.exit(0);
 	}
 }
