@@ -1,7 +1,6 @@
 package algorithm;
 
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Queue;
 import java.util.Scanner;
 
@@ -31,6 +30,7 @@ public class AdjMatrixTest {
 //		}
 		
 		dfs(adjMatrix, new boolean[V], 0);
+		sc.close();
 	}
 	
 	private static void bfs(int[][] adjMatrix) {
