@@ -42,5 +42,6 @@ public class NQueenTest1 {
 		
 		setQueen(1);
 		System.out.println(ans);
+		sc.close();
 	}
 }
