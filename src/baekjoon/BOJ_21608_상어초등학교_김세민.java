@@ -208,7 +208,7 @@ public class BOJ_21608_상어초등학교_김세민 {
 		mapSize = Integer.parseInt(br.readLine().trim());
 
 		map = new int[mapSize][mapSize];
-		students = new Student[mapSize*mapSize]; // 학생의 수는 N²²
+		students = new Student[mapSize*mapSize]; // 학생의 수는 N²
 
 		for(int idx = 0; idx < mapSize * mapSize; idx++) {
 			st = new StringTokenizer(br.readLine().trim());
