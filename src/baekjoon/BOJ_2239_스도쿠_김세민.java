@@ -70,13 +70,7 @@ public class BOJ_2239_스도쿠_김세민 {
 		
 		// 스도쿠 생성 완료
 		if(col == SUDOKU_SIZE) {
-			for(int colIdx = 0; colIdx < SUDOKU_SIZE; colIdx++) {
-				for(int rowIdx = 0; rowIdx < SUDOKU_SIZE; rowIdx++) {
-					sb.append(sudoku[colIdx][rowIdx]);
-				}
-				sb.append("\n");
-			}
-			System.out.print(sb);
+			printSudoku();
 			ok = true;
 			return;
 		}
@@ -105,19 +99,28 @@ public class BOJ_2239_스도쿠_김세민 {
 		
 	}
 	
+	private static void printSudoku() {
+		for(int col = 0; col < SUDOKU_SIZE; col++) {
+			for(int row = 0; row < SUDOKU_SIZE; row++) {
+				sb.append(sudoku[col][row]);
+			}
+			sb.append("\n");
+		}
+		System.out.println(sb);
+	}
+	
 	public static void main(String[] args) throws IOException {
 		br = new BufferedReader(new InputStreamReader(System.in));
 		sb = new StringBuilder();
 		
 		sudoku = new int[SUDOKU_SIZE][SUDOKU_SIZE];
 		
-		for(int row = 0; row < SUDOKU_SIZE; row++) {
+		for(int col = 0; col < SUDOKU_SIZE; col++) {
 			String input = br.readLine().trim();
-			for(int col = 0; col < SUDOKU_SIZE; col++) {
-				sudoku[row][col] = input.charAt(col) - '0';
+			for(int row = 0; row < SUDOKU_SIZE; row++) {
+				sudoku[col][row] = input.charAt(row) - '0';
 			}
 		}
 		fill(0, 0);
-		
 	}
 }
