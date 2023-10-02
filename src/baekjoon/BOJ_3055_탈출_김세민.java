@@ -13,7 +13,7 @@ import java.util.StringTokenizer;
 /**
  * BOJ_3055_탈출
  * 
- * @author SSAFY
+ * @author semin.kim
  *
  * [문제]
  * 티떱숲의 지도는 R행 C열로 이루어져 있다. 
@@ -35,14 +35,13 @@ public class BOJ_3055_탈출_김세민 {
 	static StringTokenizer st;
 
 	static int colSize, rowSize;
-	static char[][] map, temp;
-	static boolean[][] visited;
-	static int[][] distance;
-	static Position hedgehog;
+	static char[][] map;
+	static int[][] hedgehogDistance, waterDistance;
+	static Queue<Position> queue = new ArrayDeque<>();
 	static final int[] DELTA_COL = {-1, 1, 0, 0}; // 상하
 	static final int[] DELTA_ROW = {0, 0, -1, 1}; // 좌우
-	static List<Position> waterList = new ArrayList<Position>();
 	static int dCol, dRow; // 비버 굴의 세로, 가로 위치
+	static int sCol, sRow; // 시작 위치
 
 	static class Position {
 		int col;
@@ -57,7 +56,24 @@ public class BOJ_3055_탈출_김세민 {
 		public String toString() {
 			return "Position [col=" + col + ", row=" + row + "]";
 		}
-
+	}
+	
+	private static void spreadWater() {
+		while (!queue.isEmpty()) {
+			Position curr = queue.poll();
+			
+			for(int dir = 0; dir < 4; dir++) {
+				int nextCol = curr.col + DELTA_COL[dir];
+				int nextRow = curr.row + DELTA_ROW[dir];
+				
+				if(!isValidRange(nextCol, nextRow)) continue;
+				
+				if(waterDistance[nextCol][nextRow] == -1 && map[nextCol][nextRow] != 'X' && map[nextCol][nextRow] != 'D') {
+					waterDistance[nextCol][nextRow] = waterDistance[curr.col][curr.row] + 1;
+					queue.offer(new Position(nextCol, nextRow));
+				}
+			}
+		}
 	}
 
 	private static boolean isValidRange(int col, int row) {
@@ -67,39 +83,25 @@ public class BOJ_3055_탈출_김세민 {
 		return true;
 	}
 
-	private static void spreadWater(int time) {
-		
-	}
-
 	private static void BFS() {
-		Queue<Position> queue = new ArrayDeque<>();
-
-		queue.offer(hedgehog);
-
+		hedgehogDistance[sCol][sRow] = 0;
+		queue.offer(new Position(sCol, sRow));
+		
 		while(!queue.isEmpty()) {
 			Position curr = queue.poll();
-
-			if(curr.col == dCol && curr.row == dRow) {
-				return;
-			}
-
+			
 			for(int dir = 0; dir < 4; dir++) {
 				int nextCol = curr.col + DELTA_COL[dir];
 				int nextRow = curr.row + DELTA_ROW[dir];
-
-				// 맵의 범위를 벗어나는 경우... 무시
+				
 				if(!isValidRange(nextCol, nextRow)) continue;
-
-				// 돌인 경우... 무시
-				if(map[nextCol][nextRow] == 'X') continue;
-
-				// 물이 찰 예정인 칸인 경우... 무시
-				// spreadWater(distance[nextCol][nextRow]);
-				if(temp[nextCol][nextRow] == '*') continue;
-
-				visited[nextCol][nextRow] = true; // 방문처리
-				distance[nextCol][nextRow] = distance[curr.col][curr.row] + 1;
-				queue.offer(new Position(nextCol, nextRow));
+				
+				if(hedgehogDistance[nextCol][nextRow] == -1 && map[nextCol][nextRow] != 'X') {
+					if(waterDistance[nextCol][nextRow] > hedgehogDistance[curr.col][curr.row] + 1 || waterDistance[nextCol][nextRow] == -1) {
+						hedgehogDistance[nextCol][nextRow] = hedgehogDistance[curr.col][curr.row] + 1;
+						queue.offer(new Position(nextCol, nextRow));
+					}
+				}
 			}
 		}
 	}
@@ -112,39 +114,70 @@ public class BOJ_3055_탈출_김세민 {
 		rowSize = Integer.parseInt(st.nextToken());
 
 		map = new char[colSize][rowSize];
-		temp = new char[colSize][rowSize];
-		visited = new boolean[colSize][rowSize];
-		distance = new int[colSize][rowSize];
-
+		hedgehogDistance = new int[colSize][rowSize];
+		waterDistance = new int[colSize][rowSize];
+		
 		for(int colIdx = 0; colIdx < colSize; colIdx++) {
 			String input = br.readLine().trim();
 			for(int rowIdx = 0; rowIdx < rowSize; rowIdx++) {
 				map[colIdx][rowIdx] = input.charAt(rowIdx);
-				temp[colIdx][rowIdx] = map[colIdx][rowIdx];
-				if(map[colIdx][rowIdx] == 'S') { // 고슴도치의 위치
-					hedgehog = new Position(colIdx, rowIdx);
-				} else if(map[colIdx][rowIdx] == '*') { // 물이 차 있는 칸
-					waterList.add(new Position(colIdx, rowIdx));
-				} else if(map[colIdx][rowIdx] == 'D') { // 비버의 굴
+				hedgehogDistance[colIdx][rowIdx] = -1;
+				waterDistance[colIdx][rowIdx] = -1;
+				
+				if(map[colIdx][rowIdx] == 'S') {
+					sCol = colIdx; sRow = rowIdx;
+					map[colIdx][rowIdx] = '.';
+				}
+				
+				if(map[colIdx][rowIdx] == 'D') {
 					dCol = colIdx; dRow = rowIdx;
+				}
+				
+				if(map[colIdx][rowIdx] == '*') {
+					waterDistance[colIdx][rowIdx] = 0;
+				}
+				
+				if(map[colIdx][rowIdx] == '.') {
+					boolean flag = false;
+					for(int dir = 0; dir < 4; dir++) {
+						int nextCol = colIdx + DELTA_COL[dir];
+						int nextRow = rowIdx + DELTA_ROW[dir];
+						
+						if(!isValidRange(nextCol, nextRow)) continue;
+						
+						if(map[nextCol][nextRow] == '*') {
+							flag = true;
+						}
+					}
+					if(flag) {
+						queue.offer(new Position(colIdx, rowIdx));
+						waterDistance[colIdx][rowIdx] = 1;
+					}
 				}
 			}
 		}
-
-
+		
+		spreadWater();
 		BFS();
-
+		
 		for(int col = 0; col < colSize; col++) {
 			for(int row = 0; row < rowSize; row++) {
-				System.out.print(temp[col][row]);
+				System.out.print(waterDistance[col][row] + " ");
 			}
 			System.out.println();
 		}
 		
-		if(distance[dCol][dRow] == 0) {
-			System.out.println("KACTUS");
+		for(int col = 0; col < colSize; col++) {
+			for(int row = 0; row < rowSize; row++) {
+				System.out.print(hedgehogDistance[col][row] + " ");
+			}
+			System.out.println();
+		}
+		
+		if(hedgehogDistance[dCol][dRow] != -1) {
+			System.out.println(hedgehogDistance[dCol][dRow]);
 		} else {
-			System.out.println(distance[dCol][dRow]);
+			System.out.println("KAKTUS");
 		}
 	}
 }
