@@ -155,32 +155,6 @@ public class BOJ_3055_탈출_김세민 {
 					// 큐에 물이 차 있는 곳의 위치를 추가
 					queue.offer(new Position(colIdx, rowIdx));
 				}
-				
-				// 빈 칸인 경우..
-				if(map[colIdx][rowIdx] == '.') {
-					boolean flag = false;
-					
-					// 인접한 칸 4방향 탐색
-					for(int dir = 0; dir < 4; dir++) {
-						int nextCol = colIdx + DELTA_COL[dir];
-						int nextRow = rowIdx + DELTA_ROW[dir];
-						
-						// 지도의 범위를 벗어나는 경우... 무시
-						if(!isValidRange(nextCol, nextRow)) continue;
-						
-						// 인접한 칸에 물이 찰 예정인 경우...
-						if(map[nextCol][nextRow] == '*') {
-							flag = true;
-						}
-					}
-					
-					if(flag) {
-						// 물이 찰 예정인 칸을 큐에 추가
-						queue.offer(new Position(colIdx, rowIdx));
-						// 물이 해당 위치 도달 시간은 1
-						waterDistance[colIdx][rowIdx] = 1;
-					}
-				}
 			}
 		}
 		
