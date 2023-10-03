@@ -36,12 +36,12 @@ public class SWEA_1263_사람네트워크2_김세민 {
 	static final int INF = 987654321;
 	
 	private static void Floyd() {
-		for(int k = 0; k < peopleCount; k++) {
-			for(int i = 0; i < peopleCount; i++) {
-				if(i == k) continue;
-				for(int j = 0; j < peopleCount; j++) {
-					if(j == i || j == k) continue;
-					adjMatrix[i][j] = Math.min(adjMatrix[i][k] + adjMatrix[k][j], adjMatrix[i][j]); 
+		for(int via = 0; via < peopleCount; via++) {
+			for(int src = 0; src < peopleCount; src++) {
+				if(src == via) continue;
+				for(int dest = 0; dest < peopleCount; dest++) {
+					if(dest == src || dest == via) continue;
+					adjMatrix[src][dest] = Math.min(adjMatrix[src][via] + adjMatrix[via][dest], adjMatrix[src][dest]); 
 				}
 			}
 		}
@@ -73,11 +73,11 @@ public class SWEA_1263_사람네트워크2_김세민 {
 			peopleCount = Integer.parseInt(st.nextToken()); // 사람의 수 입력
 			adjMatrix = new int[peopleCount][peopleCount];
 			
-			for(int col = 0; col < peopleCount; col++) {
-				for(int row = 0; row < peopleCount; row++) {
-					adjMatrix[col][row] = Integer.parseInt(st.nextToken());
-					if(col != row && adjMatrix[col][row] == 0) { // 자기 자신이거나 간선이 존재하지 않는 경우...
-						adjMatrix[col][row] = INF;
+			for(int src = 0; src < peopleCount; src++) {
+				for(int dest = 0; dest < peopleCount; dest++) {
+					adjMatrix[src][dest] = Integer.parseInt(st.nextToken());
+					if(src != dest && adjMatrix[src][dest] == 0) { // 자기 자신이거나 간선이 존재하지 않는 경우...
+						adjMatrix[src][dest] = INF;
 					} 
 				}
 			}
