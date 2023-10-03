@@ -4,16 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.StringTokenizer;
-
 
 /**
  * BOJ_3055_탈출
  * 
- * @author SSAFY
+ * @author semin.kim
  *
  * [문제]
  * 티떱숲의 지도는 R행 C열로 이루어져 있다. 
@@ -25,7 +22,12 @@ import java.util.StringTokenizer;
  * 고슴도치는 물이 찰 예정인 칸으로 이동할 수 없다. 즉, 다음 시간에 물이 찰 예정인 칸으로 고슴도치는 이동할 수 없다. 이동할 수 있으면 고슴도치가 물에 빠지기 때문이다.
  * 
  * [풀이]
- * 
+ * 1. 맵의 정보를 입력받아 고슴도치 시작 위치를 저장하고 빈 칸으로 변경한다.
+ * 2. 물이 차 있는 칸을 큐에 삽입
+ * 3. 너비 우선 탐색을 통해 4방향 탐색하여 인접 칸으로 물이 퍼져나감
+ * 4. 고슴도치 시작 위치를 큐에 삽입
+ * 5. 너비 우선 탐색을 통해 물이 찰 예정이 아니고 방문할 수 있는 경우에 고슴도치가 다음 위치로 이동하여 탐색
+ * 6. 비버의 굴까지 도달할 수 있는 경우 필요한 시간 출력, 도달할 수 없는 경우 -1 출력
  * 
  */
 
@@ -34,15 +36,14 @@ public class BOJ_3055_탈출_김세민 {
 	static BufferedReader br;
 	static StringTokenizer st;
 
-	static int colSize, rowSize;
-	static char[][] map, temp;
-	static boolean[][] visited;
-	static int[][] distance;
-	static Position hedgehog;
+	static int colSize, rowSize; // 지도의 세로, 가로 크기
+	static char[][] map; // 맵의 정보를 저장할 2차원 배열
+	static int[][] hedgehogDistance, waterDistance; // 고슴도치, 물의 도달 시간을 저장할 2차원 배열
+	static Queue<Position> queue = new ArrayDeque<>();
 	static final int[] DELTA_COL = {-1, 1, 0, 0}; // 상하
 	static final int[] DELTA_ROW = {0, 0, -1, 1}; // 좌우
-	static List<Position> waterList = new ArrayList<Position>();
 	static int dCol, dRow; // 비버 굴의 세로, 가로 위치
+	static int sCol, sRow; // 고슴도치의 시작 위치 (세로, 가로)
 
 	static class Position {
 		int col;
@@ -57,49 +58,63 @@ public class BOJ_3055_탈출_김세민 {
 		public String toString() {
 			return "Position [col=" + col + ", row=" + row + "]";
 		}
-
 	}
-
-	private static boolean isValidRange(int col, int row) {
-		if(col < 0 || row < 0 || col >= colSize || row >= rowSize) {
-			return false;
-		}
-		return true;
-	}
-
-	private static void spreadWater(int time) {
-		
-	}
-
-	private static void BFS() {
-		Queue<Position> queue = new ArrayDeque<>();
-
-		queue.offer(hedgehog);
-
-		while(!queue.isEmpty()) {
+	
+	private static void spreadWater() {
+		while (!queue.isEmpty()) {
 			Position curr = queue.poll();
-
-			if(curr.col == dCol && curr.row == dRow) {
-				return;
-			}
-
+			
 			for(int dir = 0; dir < 4; dir++) {
 				int nextCol = curr.col + DELTA_COL[dir];
 				int nextRow = curr.row + DELTA_ROW[dir];
-
-				// 맵의 범위를 벗어나는 경우... 무시
+				
+				// 지도의 범위를 벗어나는 경우... 무시
 				if(!isValidRange(nextCol, nextRow)) continue;
+				
+				// 물이 퍼져나간 적이 없고 돌과 비버의 소굴이 아닌 경우... 
+				if(waterDistance[nextCol][nextRow] == -1 && map[nextCol][nextRow] == '.') {
+					waterDistance[nextCol][nextRow] = waterDistance[curr.col][curr.row] + 1; // 물이 퍼져나감
+					queue.offer(new Position(nextCol, nextRow)); // 큐에 다음 위치 삽입
+				}
+			}
+		}
+	}
 
-				// 돌인 경우... 무시
-				if(map[nextCol][nextRow] == 'X') continue;
+	/**
+	 * 지도의 범위를 벗어나는지 확인하는 메서드
+	 * @param col
+	 * @param row
+	 * @return 지도의 범위를 벗어나지 않는 경우... true 반환
+	 * 			지도의 범위를 벗어나는 경우... false 반환
+	 */
+	private static boolean isValidRange(int col, int row) {
+		return col >= 0 && row >= 0 && col < colSize && row < rowSize;
+	}
 
-				// 물이 찰 예정인 칸인 경우... 무시
-				// spreadWater(distance[nextCol][nextRow]);
-				if(temp[nextCol][nextRow] == '*') continue;
-
-				visited[nextCol][nextRow] = true; // 방문처리
-				distance[nextCol][nextRow] = distance[curr.col][curr.row] + 1;
-				queue.offer(new Position(nextCol, nextRow));
+	private static void BFS() {
+		hedgehogDistance[sCol][sRow] = 0; // 고슴도치 시작 위치에서 도달 시간은 0
+		queue.offer(new Position(sCol, sRow)); // 고슴도치 시작 위치를 큐에 추가
+		
+		while(!queue.isEmpty()) {
+			Position curr = queue.poll();
+			
+			for(int dir = 0; dir < 4; dir++) {
+				int nextCol = curr.col + DELTA_COL[dir];
+				int nextRow = curr.row + DELTA_ROW[dir];
+				
+				// 지도의 범위를 벗어나는 경우... 무시
+				if(!isValidRange(nextCol, nextRow)) continue;
+				
+				// 고슴도치가 방문한 적이 없고 돌이 아닌 경우...
+				if(hedgehogDistance[nextCol][nextRow] == -1 && map[nextCol][nextRow] != 'X') {
+					// 물이 찰 예정이지 않거나 물이 찬 적이 없는 경우...
+					if(waterDistance[nextCol][nextRow] > hedgehogDistance[curr.col][curr.row] + 1 || waterDistance[nextCol][nextRow] == -1) {
+						// 인접한 칸까지 도달 시간은 현재 위치 도달 시간 + 1
+						hedgehogDistance[nextCol][nextRow] = hedgehogDistance[curr.col][curr.row] + 1;
+						// 큐에 다음 위치 삽입
+						queue.offer(new Position(nextCol, nextRow));
+					}
+				}
 			}
 		}
 	}
@@ -112,39 +127,73 @@ public class BOJ_3055_탈출_김세민 {
 		rowSize = Integer.parseInt(st.nextToken());
 
 		map = new char[colSize][rowSize];
-		temp = new char[colSize][rowSize];
-		visited = new boolean[colSize][rowSize];
-		distance = new int[colSize][rowSize];
-
+		hedgehogDistance = new int[colSize][rowSize];
+		waterDistance = new int[colSize][rowSize];
+		
 		for(int colIdx = 0; colIdx < colSize; colIdx++) {
 			String input = br.readLine().trim();
 			for(int rowIdx = 0; rowIdx < rowSize; rowIdx++) {
 				map[colIdx][rowIdx] = input.charAt(rowIdx);
-				temp[colIdx][rowIdx] = map[colIdx][rowIdx];
-				if(map[colIdx][rowIdx] == 'S') { // 고슴도치의 위치
-					hedgehog = new Position(colIdx, rowIdx);
-				} else if(map[colIdx][rowIdx] == '*') { // 물이 차 있는 칸
-					waterList.add(new Position(colIdx, rowIdx));
-				} else if(map[colIdx][rowIdx] == 'D') { // 비버의 굴
+				// 고슴도치와 물이 방문 여부 및 시간을 저장할 2차원 배열 -1로 초기화
+				hedgehogDistance[colIdx][rowIdx] = -1;
+				waterDistance[colIdx][rowIdx] = -1;
+				
+				// 고슴도치 시작 위치 저장, 빈 칸으로 변경
+				if(map[colIdx][rowIdx] == 'S') {
+					sCol = colIdx; sRow = rowIdx;
+					map[colIdx][rowIdx] = '.';
+				}
+				
+				// 비버의 굴 위치 저장
+				if(map[colIdx][rowIdx] == 'D') {
 					dCol = colIdx; dRow = rowIdx;
+				}
+				
+				// 물이 차 있는 곳의 위치의 퍼져 나가는 시간을 0으로 설정
+				if(map[colIdx][rowIdx] == '*') {
+					waterDistance[colIdx][rowIdx] = 0;
+					// 큐에 물이 차 있는 곳의 위치를 추가
+					queue.offer(new Position(colIdx, rowIdx));
+				}
+				
+				// 빈 칸인 경우..
+				if(map[colIdx][rowIdx] == '.') {
+					boolean flag = false;
+					
+					// 인접한 칸 4방향 탐색
+					for(int dir = 0; dir < 4; dir++) {
+						int nextCol = colIdx + DELTA_COL[dir];
+						int nextRow = rowIdx + DELTA_ROW[dir];
+						
+						// 지도의 범위를 벗어나는 경우... 무시
+						if(!isValidRange(nextCol, nextRow)) continue;
+						
+						// 인접한 칸에 물이 찰 예정인 경우...
+						if(map[nextCol][nextRow] == '*') {
+							flag = true;
+						}
+					}
+					
+					if(flag) {
+						// 물이 찰 예정인 칸을 큐에 추가
+						queue.offer(new Position(colIdx, rowIdx));
+						// 물이 해당 위치 도달 시간은 1
+						waterDistance[colIdx][rowIdx] = 1;
+					}
 				}
 			}
 		}
-
-
-		BFS();
-
-		for(int col = 0; col < colSize; col++) {
-			for(int row = 0; row < rowSize; row++) {
-				System.out.print(temp[col][row]);
-			}
-			System.out.println();
-		}
 		
-		if(distance[dCol][dRow] == 0) {
-			System.out.println("KACTUS");
-		} else {
-			System.out.println(distance[dCol][dRow]);
+		spreadWater();
+		BFS();
+		
+		// 고슴도치가 비버의 굴로 이동할 수 있는 경우...
+		if(hedgehogDistance[dCol][dRow] != -1) {
+			System.out.println(hedgehogDistance[dCol][dRow]);
+		}
+		// 이동할 수 없는 경우...
+		else {
+			System.out.println("KAKTUS");
 		}
 	}
 }
