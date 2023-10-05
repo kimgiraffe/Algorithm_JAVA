@@ -3,13 +3,9 @@ package swea;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.StringTokenizer;
-
+import java.util.TreeSet;
 
 /**
  * SWEA_5658_보물상자비밀번호
@@ -31,7 +27,7 @@ public class SWEA_5658_보물상자비밀번호_김세민 {
 	static int numberCount, K; // 숫자의 수
 	static char[] numList;
 
-	static Set<Integer> set;
+	static TreeSet<Integer> set;
 
 	private static void generateNumbers() {
 		for(int turn = 0; turn < numberCount / 4; turn++) {
@@ -70,17 +66,6 @@ public class SWEA_5658_보물상자비밀번호_김세민 {
 			}
 		}
 	}
-	
-	private static void sortNumbers() {
-		// 생성한 수들을 list에 담기
-		ArrayList list = new ArrayList(set);
-	
-		// 생성한 수들을 내림차순으로 정렬
-		Collections.sort(list, Comparator.reverseOrder());
-		
-		// K번째로 큰 수
-		sb.append(list.get(K-1)).append("\n");
-	}
 
 	public static void main(String[] args) throws IOException {
 		br = new BufferedReader(new InputStreamReader(System.in));
@@ -98,16 +83,22 @@ public class SWEA_5658_보물상자비밀번호_김세민 {
 				numList[idx] = input.charAt(idx);
 			}
 
-			set = new HashSet<>();
+			set = new TreeSet<Integer>(Collections.reverseOrder());
 
 			// 수 생성
 			generateNumbers();
 
 			sb.append("#").append(testcase).append(" ");
 			
-			sortNumbers();
+			int count = 0;
+			while(count < K - 1) {
+				set.pollFirst();
+				count++;
+			}
+			sb.append(set.first()).append("\n");
+			
 		}
 		
-		System.out.println(sb);
+		System.out.print(sb);
 	}
 }
