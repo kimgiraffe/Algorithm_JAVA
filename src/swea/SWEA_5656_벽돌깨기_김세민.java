@@ -13,8 +13,7 @@ import java.util.StringTokenizer;
  * 1. 구슬을 왼쪽 줄부터 쏘아본다.
  * 2. 벽돌이 구슬에 명중할 경우, 깊이 우선 탐색을 통해 폭발을 수행한다.
  * 3. 폭발이 모두 끝나면 벽돌을 떨어뜨린다.
- * 4. 구슬을 모두 쏜 후, 폭발한 벽돌의 개수의 최댓값을 갱신한다.
- * 5. 초기 벽돌의 수에서 폭발한 벽돌의 수의 최댓값을 뺀 값을 출력한다.
+ * 4. 구슬을 모두 쏜 후, 남아있는 벽돌 수의 초솟값을 갱신한다.
  * 
  */
 
@@ -24,34 +23,30 @@ public class SWEA_5656_벽돌깨기_김세민 {
 	static StringTokenizer st;
 	static StringBuilder sb;
 
-	static int testcaseCount;
-	static int marbleCount, width, height;
-	static int[][][] map;
-	static final int[] DELTA_H = {-1, 1, 0, 0};
-	static final int[] DELTA_W = {0, 0, -1, 1};
-	static int[][] heightList;
-	static int remainingBrickCount, minRemainingBrickCount = Integer.MAX_VALUE;
+	static int testcaseCount; // 테스트케이스의 수
+	static int marbleCount, width, height; // 쏜 구슬의 총 수, 너비, 높이
+	static int[][][] map; // [쏜 구슬의 개수][col][row]
+	static final int[] DELTA_H = {-1, 1, 0, 0}; // 하, 상
+	static final int[] DELTA_W = {0, 0, -1, 1}; // 좌, 우
+	static int[][] heightList; // 쏜 구슬의 개수에 따라 각 row의 가장 맨 위에 있는 구슬의 높이를 저장할 2차원 배열
+	static int remainingBrickCount, minRemainingBrickCount = Integer.MAX_VALUE; // 남아있는 벽돌 수, 남아있는 벽돌 수의 최솟값
 
-	static class Postion {
-		int col;
-		int row;
-
-		public Postion(int col, int row) {
-			this.col = col;
-			this.row = row;
-		}
-
-		@Override
-		public String toString() {
-			return "Postion [col=" + col + ", row=" + row + "]";
-		}
-	}
-
+	/**
+	 * 맵을 범위를 벗어나는지 확인하는 메서드
+	 * @param h
+	 * @param w
+	 * @return true if is VaildRange, false if is not.
+	 */
 	private static boolean isValidRange(int h, int w) {
 		return h >= 0 && w >= 0 && h < height && w < width;
 	}
 
-	private static void copyMap(int copyIdx, int pasteIdx) {
+	/**
+	 * map[copyIdx][][] 를 map[pasteIdx][][] 에 복사하고, heightList[copyIdx][]를 heightList[pasteIdx][]에 복사하는 메서드
+	 * @param copyIdx
+	 * @param pasteIdx
+	 */
+	private static void copy(int copyIdx, int pasteIdx) {
 		for(int h = 0; h < height; h++) {
 			for(int w = 0; w < width; w++) {
 				map[pasteIdx][h][w] = map[copyIdx][h][w]; 
@@ -67,8 +62,9 @@ public class SWEA_5656_벽돌깨기_김세민 {
 	 * @param idx
 	 * @return
 	 */
-	private static int calculateSum(int idx) {
+	private static int calculateRemainingBricks(int idx) {
 		int sum = 0;
+		// 각 row 마다 맵의 높이에서 맨 위에 있는 벽돌의 높이를 빼준다.
 		for(int row = 0; row < width; row++) {
 			sum += height - heightList[idx][row];
 		}
@@ -78,21 +74,22 @@ public class SWEA_5656_벽돌깨기_김세민 {
 	
 	private static void shoot(int marbleIdx) {
 		if(marbleIdx == marbleCount) { // 구슬을 모두 다 쏜 경우...
-			remainingBrickCount = calculateSum(marbleIdx);
+			remainingBrickCount = calculateRemainingBricks(marbleIdx);
 			
 			// 남은 벽돌의 개수의 최솟값 갱신
 			minRemainingBrickCount = Math.min(minRemainingBrickCount, remainingBrickCount);
 			return;
 		}
 		
+		// 맨 왼쪽부터 쏘기
 		for(int w = 0; w < width; w++) {
 			int h = heightList[marbleIdx][w];
 			
 			// 직전의 구슬을 쏜 맵 복사
-			copyMap(marbleIdx, marbleIdx + 1);
+			copy(marbleIdx, marbleIdx + 1);
 			
-			if(h == height) {
-				if(calculateSum(marbleIdx) == 0) {
+			if(h == height) { // 
+				if(calculateRemainingBricks(marbleIdx) == 0) {
 					shoot(marbleIdx + 1); // 다음 구슬 쏘기
 					continue;
 				}
@@ -101,6 +98,7 @@ public class SWEA_5656_벽돌깨기_김세민 {
 				}
 			}
 			
+			// 맨 위에 있는 벽돌의 높이 갱신
 			heightList[marbleIdx+1][w]++;
 			// 벽돌깨기
 			explode(h, w, marbleIdx + 1);
@@ -115,10 +113,10 @@ public class SWEA_5656_벽돌깨기_김세민 {
 		// 벽돌에 적힌 숫자 저장
 		int brickNum = map[marbleIdx][h][w];
 		
-		// 벽돌의 상태를 폭발한 상태로 변경
+		// 벽돌의 상태를 폭발한 상태(빈 칸)로 변경
 		map[marbleIdx][h][w] = 0;
 		
-		// 벽돌에 적힌 숫자만큼 4방향 탐색
+		// 벽돌에 적힌 숫자 - 1만큼 4방향 탐색
 		for(int num = 1; num < brickNum; num++) {
 			for(int dir = 0; dir < 4; dir++) {
 				int nextH = h + DELTA_H[dir] * num;
@@ -127,6 +125,7 @@ public class SWEA_5656_벽돌깨기_김세민 {
 					// 빈 칸인 경우... 무시
 					if(map[marbleIdx][nextH][nextW] == 0) continue;
 					
+					// 맨 위에 있는 벽돌의 높이 갱신
 					heightList[marbleIdx][nextW]++;
 					
 					// 연쇄 폭발
@@ -137,15 +136,17 @@ public class SWEA_5656_벽돌깨기_김세민 {
 	}
 	
 	private static void drop(int marbleIdx) {
-		for(int row = 0; row < width; row++) {
-			for(int col = height - 1; col >= 0; col--) {
-				if(col < heightList[marbleIdx][row]) continue;
+		for(int w = 0; w < width; w++) {
+			for(int h = height - 1; h >= 0; h--) {
+				if(h < heightList[marbleIdx][w]) continue;
 				
-				if(map[marbleIdx][col][row] == 0) {
-					for(int tempCol = col - 1; tempCol >= 0; tempCol--) {
-						if(map[marbleIdx][tempCol][row] != 0) {
-							map[marbleIdx][col][row] = map[marbleIdx][tempCol][row];
-							map[marbleIdx][tempCol][row] = 0;
+				// 벽돌이 남아있는 경우...
+				if(map[marbleIdx][h][w] == 0) {
+					for(int tempH = h - 1; tempH >= 0; tempH--) {
+						// 빈 칸이 아닌 것이 있는 경우...
+						if(map[marbleIdx][tempH][w] != 0) {
+							map[marbleIdx][h][w] = map[marbleIdx][tempH][w];
+							map[marbleIdx][tempH][w] = 0;
 							break;
 						}
 					}
@@ -164,10 +165,11 @@ public class SWEA_5656_벽돌깨기_김세민 {
 			st = new StringTokenizer(br.readLine().trim());
 			sb.append("#").append(testcase).append(" ");
 
-			marbleCount = Integer.parseInt(st.nextToken());
-			width = Integer.parseInt(st.nextToken());
-			height = Integer.parseInt(st.nextToken());
+			marbleCount = Integer.parseInt(st.nextToken()); // 쏠 구슬의 총 수 입력
+			width = Integer.parseInt(st.nextToken()); // 맵의 너비 입력
+			height = Integer.parseInt(st.nextToken()); // 맵의 높이 입력
 
+			// 변수 초기화
 			map = new int[marbleCount + 1][height][width];
 			heightList = new int[marbleCount + 1][width];
 			minRemainingBrickCount = Integer.MAX_VALUE;
@@ -180,12 +182,14 @@ public class SWEA_5656_벽돌깨기_김세민 {
 				st = new StringTokenizer(br.readLine().trim());
 				for(int row = 0; row < width; row++) {
 					map[0][col][row] = Integer.parseInt(st.nextToken());
+					// 맨 위에 있는 벽돌 찾기
 					if(heightList[0][row] == height && map[0][col][row] != 0) {
 						heightList[0][row] = col;
 					}
 				}
 			}
 			
+			// 벽돌깨기 시작
 			shoot(0);
 			
 			sb.append(minRemainingBrickCount).append("\n");
