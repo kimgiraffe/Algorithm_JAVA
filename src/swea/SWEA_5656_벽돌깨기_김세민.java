@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-import sun.net.www.content.image.gif;
-import sun.tools.jar.resources.jar;
-
 /**
  * SWEA_5656_벽돌깨기
  * 
@@ -65,6 +62,11 @@ public class SWEA_5656_벽돌깨기_김세민 {
 		}
 	}
 
+	/**
+	 * 남은 벽돌의 수를 합하는 메서드
+	 * @param idx
+	 * @return
+	 */
 	private static int calculateSum(int idx) {
 		int sum = 0;
 		for(int row = 0; row < width; row++) {
@@ -75,9 +77,10 @@ public class SWEA_5656_벽돌깨기_김세민 {
 	}
 	
 	private static void shoot(int marbleIdx) {
-		if(marbleIdx == marbleCount) {
+		if(marbleIdx == marbleCount) { // 구슬을 모두 다 쏜 경우...
 			remainingBrickCount = calculateSum(marbleIdx);
 			
+			// 남은 벽돌의 개수의 최솟값 갱신
 			minRemainingBrickCount = Math.min(minRemainingBrickCount, remainingBrickCount);
 			return;
 		}
@@ -85,11 +88,12 @@ public class SWEA_5656_벽돌깨기_김세민 {
 		for(int w = 0; w < width; w++) {
 			int h = heightList[marbleIdx][w];
 			
+			// 직전의 구슬을 쏜 맵 복사
 			copyMap(marbleIdx, marbleIdx + 1);
 			
 			if(h == height) {
 				if(calculateSum(marbleIdx) == 0) {
-					shoot(marbleIdx + 1);
+					shoot(marbleIdx + 1); // 다음 구슬 쏘기
 					continue;
 				}
 				else {
@@ -98,29 +102,34 @@ public class SWEA_5656_벽돌깨기_김세민 {
 			}
 			
 			heightList[marbleIdx+1][w]++;
-			
+			// 벽돌깨기
 			explode(h, w, marbleIdx + 1);
-			
+			// 벽돌 떨어뜨리기
 			drop(marbleIdx + 1);
-			
+			// 다음 구슬 쏘기
 			shoot(marbleIdx + 1);
 		}
 	}
 
 	private static void explode(int h, int w, int marbleIdx) {
+		// 벽돌에 적힌 숫자 저장
 		int brickNum = map[marbleIdx][h][w];
 		
+		// 벽돌의 상태를 폭발한 상태로 변경
 		map[marbleIdx][h][w] = 0;
 		
+		// 벽돌에 적힌 숫자만큼 4방향 탐색
 		for(int num = 1; num < brickNum; num++) {
 			for(int dir = 0; dir < 4; dir++) {
 				int nextH = h + DELTA_H[dir] * num;
 				int nextW = w + DELTA_W[dir] * num;
-				if(isValidRange(nextH, nextW)) {
+				if(isValidRange(nextH, nextW)) { // 지도를 벗어나지 않는 경우...
+					// 빈 칸인 경우... 무시
 					if(map[marbleIdx][nextH][nextW] == 0) continue;
 					
 					heightList[marbleIdx][nextW]++;
 					
+					// 연쇄 폭발
 					explode(nextH, nextW, marbleIdx);
 				}
 			}
@@ -149,7 +158,7 @@ public class SWEA_5656_벽돌깨기_김세민 {
 		br = new BufferedReader(new InputStreamReader(System.in));
 		sb = new StringBuilder();
 
-		testcaseCount = Integer.parseInt(br.readLine().trim());
+		testcaseCount = Integer.parseInt(br.readLine().trim()); // 테스트케이스의 수 입력
 
 		for(int testcase = 1; testcase <= testcaseCount; testcase++) {
 			st = new StringTokenizer(br.readLine().trim());
