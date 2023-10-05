@@ -22,24 +22,26 @@ public class BOJ_1786_찾기_김세민 {
 	static int textLength, patternLength; // 텍스트의 길이, 패턴의 길이
 	static int[] failure; // 맨 앞부터 해당 인덱스까지 길이가 2이상인 부분문자열 중 접두사이면서 접미사인 최대 문자열의 길이
 	static int matchCount; // 패턴 매칭 횟수
+	static int[] match;
 	
 	/**
 	 * 부분일치 테이블 생성 메서드
 	 */
-	private static void fail() {
-		int i, j;
+	private static void generateFailFunc() {
+		int prefixIdx, suffixIdx;
 		
 		failure[0] = -1;
-		for(j = 1; j < patternLength; j++) {
-			i = failure[j - 1];
+		for(suffixIdx = 1; suffixIdx < patternLength; suffixIdx++) {
+			prefixIdx = failure[suffixIdx - 1];
 			
-			while((pattern.charAt(j) != pattern.charAt(i + 1)) && (i >= 0)) {
-				i = failure[i];
+			// 일치할 때까지 접두부 이동
+			while((pattern.charAt(suffixIdx) != pattern.charAt(prefixIdx + 1)) && (prefixIdx >= 0)) {
+				prefixIdx = failure[prefixIdx];
 			}
-			if(pattern.charAt(j) == pattern.charAt(i + 1)) {
-				failure[j] = i + 1; 
-			} else {
-				failure[j]= -1; 
+			if(pattern.charAt(suffixIdx) == pattern.charAt(prefixIdx + 1)) { // 접두부와 접미부가 일치하는 경우...
+				failure[suffixIdx] = prefixIdx + 1; 
+			} else { // 접두부와 접미부가 일치하지 않는 경우...
+				failure[suffixIdx]= -1; 
 			}
 		}
 	}
@@ -59,7 +61,8 @@ public class BOJ_1786_찾기_김세민 {
 			}
 			if(patternPointer == patternLength) { // 패턴 매칭 성공
 				matchCount++; // 패턴이 나타나는 횟수 1 증가
-				sb.append(textPointer - patternLength + 1).append(" "); // 패턴이 나타나는 위치
+				match[matchCount-1] = textPointer - patternLength + 1;
+				//sb.append(textPointer - patternLength + 1).append(" "); // 패턴이 나타나는 위치
 				patternPointer = failure[patternPointer - 1] + 1; // 패턴 포인터 이동
 			}
 		}
@@ -75,11 +78,16 @@ public class BOJ_1786_찾기_김세민 {
 		patternLength = pattern.length();
 		
 		failure = new int[patternLength];
+		match = new int[textLength];
 		
-		fail(); // 부분일치 테이블 생성
+		generateFailFunc(); // 부분일치 테이블 생성
 		KMP(); 
 		
-		System.out.println(matchCount);
+		sb.append(matchCount).append("\n");
+		for(int idx = 0; idx < matchCount; idx++) {
+			sb.append(match[idx]).append(" ");
+		}
+		
 		System.out.println(sb);
 	}
 }
